@@ -2095,7 +2095,7 @@ class EMRJobRunner(MRJobRunner):
             log.info('Check 1')
             if self._opts['emr_job_flow_pool_name'] != name:
                 return
-            log.info('Check 2')
+            log.info('Check 2: job_flow_version=%s, my_version=%s' % (job_flow.hadoopversion, self.get_hadoop_version() ))
 
             # match hadoop version
             if job_flow.hadoopversion != self.get_hadoop_version():
