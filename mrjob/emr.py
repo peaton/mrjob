@@ -2089,6 +2089,7 @@ class EMRJobRunner(MRJobRunner):
             # match pool name, and (bootstrap) hash
             myhash, name = pool_hash_and_name(job_flow)
             log.info('Hash of existing job flow: name=%s, hash=%s' % (name, myhash))
+            log.info('Trying to match against: name%s,hash=%s' % (self._opts['emr_job_flow_pool_name'], req_hash))
             if req_hash != myhash:
                 return
 
