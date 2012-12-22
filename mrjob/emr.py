@@ -2089,31 +2089,36 @@ class EMRJobRunner(MRJobRunner):
             # match pool name, and (bootstrap) hash
             myhash, name = pool_hash_and_name(job_flow)
             log.info('Hash of existing job flow: name=%s, hash=%s' % (name, myhash))
-            log.info('Trying to match against: name%s,hash=%s' % (self._opts['emr_job_flow_pool_name'], req_hash))
+            log.info('Trying to match against: name=%s,hash=%s' % (self._opts['emr_job_flow_pool_name'], req_hash))
             if req_hash != myhash:
                 return
-
+            log.info('Check 1')
             if self._opts['emr_job_flow_pool_name'] != name:
                 return
+            log.info('Check 2')
 
             # match hadoop version
             if job_flow.hadoopversion != self.get_hadoop_version():
                 return
+            log.info('Check 3')
 
             # match AMI version
             job_flow_ami_version = getattr(job_flow, 'amiversion', None)
             if job_flow_ami_version != self._opts['ami_version']:
                 return
+            log.info('Check 4')
 
             # there is a hard limit of 256 steps per job flow
             if len(job_flow.steps) + num_steps > MAX_STEPS_PER_JOB_FLOW:
                 return
+            log.info('Check 5')
 
             # in rare cases, job flow can be WAITING *and* have incomplete
             # steps
             if any(getattr(step, 'enddatetime', None) is None
                    for step in job_flow.steps):
                 return
+            log.info('Check 6')
 
             # total compute units per group
             role_to_cu = defaultdict(float)
@@ -2128,6 +2133,7 @@ class EMRJobRunner(MRJobRunner):
 
                 # unknown, new kind of role; bail out!
                 if role not in ('core', 'master', 'task'):
+                    log.info('Check 7')
                     return
 
                 req_instance_type = role_to_req_instance_type[role]
@@ -2136,6 +2142,7 @@ class EMRJobRunner(MRJobRunner):
                     mem = EC2_INSTANCE_TYPE_TO_MEMORY.get(ig.instancetype, 0.0)
                     req_mem = role_to_req_mem.get(role, 0.0)
                     if mem < req_mem:
+                        log.info('Check 8')
                         return
 
                 # if bid price is too low, don't count compute units
@@ -2180,6 +2187,7 @@ class EMRJobRunner(MRJobRunner):
                 if req_num_instances > role_to_matched_instances[role]:
                     cu = role_to_cu.get(role, 0.0)
                     if cu < req_cu:
+                        log.info('Check 9')
                         return
 
             # make a sort key
