@@ -2260,6 +2260,9 @@ class EMRJobRunner(MRJobRunner):
             self._opts['bootstrap_cmds'],
             self._bootstrap_actions,
         ]
+        
+        for name, path in self._bootstrap_dir_mgr.name_to_path('file').iteritems():
+            log.info('Bootstrap for hashing %s, %s' % (name, path))
 
         if self._opts['bootstrap_mrjob']:
             things_to_hash.append(mrjob.__version__)
