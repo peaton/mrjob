@@ -2044,6 +2044,7 @@ class EMRJobRunner(MRJobRunner):
         exclude = exclude or set()
 
         req_hash = self._pool_hash()
+        log.info('Hash for pool compatibility: %s' % req_hash)
 
         # decide memory and total compute units requested for each
         # role type
@@ -2086,8 +2087,9 @@ class EMRJobRunner(MRJobRunner):
                 return
 
             # match pool name, and (bootstrap) hash
-            hash, name = pool_hash_and_name(job_flow)
-            if req_hash != hash:
+            myhash, name = pool_hash_and_name(job_flow)
+            log.info('Hash of existing job flow: name=%s, hash=%s' % (name, myhash))
+            if req_hash != myhash:
                 return
 
             if self._opts['emr_job_flow_pool_name'] != name:
@@ -2261,8 +2263,10 @@ class EMRJobRunner(MRJobRunner):
 
         if self._opts['bootstrap_mrjob']:
             things_to_hash.append(mrjob.__version__)
-        return hash_object(things_to_hash)
-
+        myhash = hash_object(things_to_hash)
+        log.info('Constructing pool hash: hash=%s, source=%s' % (myhash, things_to_hash))
+        return myhash
+    
     ### EMR-specific STUFF ###
 
     def make_emr_conn(self):
